@@ -1,46 +1,51 @@
 (function( $ ){
-	
-	// jQpup
-	$.fn.jQpup = function() 
-	{
-		return this.each(function() {     
 
-			var $this       = $(this),
-				h_document  = $(document).height(),
-				w_document  = $(document).width(),
-				el_close    = $('<div class="el-popup-close attr-popup-close">X</div>'),
-				el_overview = $('<div class="el-popup-overview">');
+    // jQpup
+    $.fn.jQpup = function( option )
+    {
+        return this.each(function() {
 
-			el_overview.height( h_document ).width( w_document );
+            var $this       = $(this),
+                h_document  = $(document).height(),
+                w_document  = $(document).width(),
+                el_close    = $('<div class="el-popup-close attr-popup-close">X</div>'),
+                el_overview = $('<div class="el-popup-overview">');
 
-			$this.prepend( el_close ).wrap( el_overview );
+            el_overview.removeAttr('style').height( h_document ).width( w_document );
 
-			$this.css({ 'margin-top':  - ( $this.outerHeight( true ) / 2 ) } );
-			$this.css({ 'margin-left': - ( $this.outerWidth ( true ) / 2 ) } );
+            if ( !$('.jQpup').is(":visible") ) {
+                $this.appendTo("body").end().prepend( el_close ).wrap( el_overview );
+            }
 
-			$(window).resize(function()
-			{
-				h_document = $(document).height();
-				w_document = $(document).width();
-				$this.closest('.el-popup-overview').height( h_document ).width( w_document );
-			});
+            $this.append( option.content.clone(true) );
 
-			$this.closest('.el-popup-overview').click(function(e) {
+            $this.removeAttr('style');
+            $this.css({ 'margin-top' :  - ( $this.outerHeight( true ) / 2 ) } );
+            $this.css({ 'margin-left': - ( $this.outerWidth ( true ) / 2 ) } );
 
-				var el_click = $(e.target);
+            $(window).resize(function()
+            {
+                h_document = $(document).height();
+                w_document = $(document).width();
+                $this.closest('.el-popup-overview').height( h_document ).width( w_document );
+            });
 
-				if( el_click.hasClass('el-popup-overview') || el_click.hasClass('attr-popup-close') ){
-					$(window).off('resize');
-					el_close.remove();
-					$this.unwrap(el_overview).hide();
-				}
-				
-			});
+            $this.closest('.el-popup-overview').click(function(e) {
 
-		 	$(this).show();
+                var el_click = $(e.target);
 
-		});
-	};	
+                if( el_click.hasClass('el-popup-overview') || el_click.hasClass('attr-popup-close') ){
+                    $(window).off('resize');
+                    $this.empty();
+                    $this.unwrap(el_overview).hide();
+                }
+
+            });
+
+            $this.show();
+
+        });
+    };
 
 })(jQuery);
 
@@ -48,7 +53,7 @@ $(function(){
 
 	// init jQpup
 	$('.img').click(function(){
-		$(".jQpup").jQpup();
+		$(".jQpup").jQpup({ content: $('.jQpup-content') });
 	});
 
 });
