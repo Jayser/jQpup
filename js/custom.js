@@ -1,59 +1,98 @@
-(function( $ ){
+(function(){
 
     // jQpup
-    $.fn.jQpup = function( option )
-    {
-        return this.each(function() {
+    window.jQpup = function( opt ) {
+        var jp = {
+            $this     : $('<div class="jQpup"></div>'),
+            $close    : $('<div class="el-popup-close attr-popup-close">X</div>'),
+            $overview : $('<div class="el-popup-overview">'),
+            body      : document.body
+        };
 
-            var $this       = $(this),
-                h_document  = $(document).height(),
-                w_document  = $(document).width(),
-                el_close    = $('<div class="el-popup-close attr-popup-close">X</div>'),
-                el_overview = $('<div class="el-popup-overview">');
+        jp.Open = function () {
 
-            el_overview.removeAttr('style').height( h_document ).width( w_document );
+            // Append jQpup
+            if ($('.jQpup').length === 0) $(jp.body).append(jp.$this.prepend(jp.$close));
 
-            if ( !$('.jQpup').is(":visible") ) {
-                $this.appendTo("body").end().prepend( el_close ).wrap( el_overview );
-            }
+            // Remove scroll from body
+            $(jp.body).css('overflow','hidden');
 
-            $this.append( option.content.clone(true) );
+            // Show jQpup
+            jp.$this.addClass('inline-block');
 
-            $this.removeAttr('style');
-            $this.css({ 'margin-top' :  - ( $this.outerHeight( true ) / 2 ) } );
-            $this.css({ 'margin-left': - ( $this.outerWidth ( true ) / 2 ) } );
+            // Add overview
+            $(jp.body).append(jp.$overview);
 
-            $(window).resize(function()
-            {
-                h_document = $(document).height();
-                w_document = $(document).width();
-                $this.closest('.el-popup-overview').height( h_document ).width( w_document );
+            // Append content
+            opt.content.clone(true).show().appendTo( jp.$this );
+
+            // Add event
+            jp.AddEvent();
+        };
+
+        jp.AddEvent = function() {
+
+            // Close & Overview
+            $('.attr-popup-close, .el-popup-overview').one('click', jp.Close);
+
+            // Resize position
+            jp.Position();
+            $(window).resize(jp.Position);
+        };
+
+        jp.RemoveEvent = function() {
+
+            // Off resize position
+            $(window).off('resize');
+        };
+
+        jp.Position = function() {
+            // Get dimension
+            var dH = $(window).height(),
+                dW = $(window).width(),
+                Ptop  = (dH - jp.$this.height()) / 2,
+                Pleft = (dW - jp.$this.width())  / 2;
+
+            // Overview height
+            $('.el-popup-overview').height(dH);
+
+            // Set dimension jQpup
+            jp.$this.css({
+                'top' : Ptop + $(document).scrollTop(),
+                'left': Pleft
             });
+        };
 
-            $this.closest('.el-popup-overview').click(function(e) {
+        jp.Close = function () {
 
-                var el_click = $(e.target);
+            // Remove jQpup
+            $('.jQpup').remove();
 
-                if( el_click.hasClass('el-popup-overview') || el_click.hasClass('attr-popup-close') ){
-                    $(window).off('resize');
-                    $this.empty();
-                    $this.unwrap(el_overview).hide();
-                }
+             // Remove scroll from body
+            $(jp.body).removeAttr('style');
 
-            });
+            // Remove wrapper
+            $('.el-popup-overview').remove();
 
-            $this.show();
+            // Remove Event
+            jp.RemoveEvent();
+        }
 
-        });
+        return {
+            open  : jp.Open,
+            close : jp.Close
+        }
+
     };
 
-})(jQuery);
+}());
 
 $(function(){
 
-	// init jQpup
-	$('.img').click(function(){
-		$(".jQpup").jQpup({ content: $('.jQpup-content') });
-	});
+    // init jQpup
+    $('.img').click(function(){
+        jQpup({ content: $('.jQpup-content') }).open();
+    });
+
 
 });
